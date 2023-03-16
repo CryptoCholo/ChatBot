@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import CreateMsg from "./createMsg";
 import BotMsg from "./botMsg";
 
 export default function MsgBubble(props) {
-
         const { messages } = props;
+
+        const messagesEndRef = useRef(null);
 
          const msg = messages.map(message => {
 
@@ -19,10 +20,16 @@ export default function MsgBubble(props) {
             }
         })
 
+        useEffect(() => {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }, [msg]);
+
+        
 
     return (
-        <div className="w-ful p-5 relative" style={{ overflowY: 'scroll', height: '83.33vh' }}>
+        <div className="w-ful p-5 relative" style={{ overflowY: 'scroll', height: '83.33vh' ,}}>
             {msg}
+            <div ref={messagesEndRef} />
         </div> 
     )
 }

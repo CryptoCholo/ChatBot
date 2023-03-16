@@ -21,7 +21,7 @@ class Restaurant {
     }
 
     createEvent({ message, data, eventName }) {
-        const event = new GameSessionEvent({ message, data, eventName })
+        const event = new RestaurantEvent({ message, data, eventName })
         this.events.push(event);
         return event;
     }
@@ -38,6 +38,21 @@ class Restaurant {
 
     getMenu() {
         return this.menu.getMenu();
+    }
+
+    getGrilledMenu() {
+        return this.menu.getGrilledMenu();
+    }
+
+    getSoupMenu() {
+        return this.menu.getSoupMenu();
+    }
+
+    getSideMenu() {
+        return this.menu.getSideMenu();
+    }
+    getBeverageMenu() {
+        return this.menu.getBeverageMenu();
     }
 
     placeOrder(orderItems) {

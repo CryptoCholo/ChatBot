@@ -91,30 +91,38 @@ io.on("connection", (socket) => {
     console.log('cancelled order')
   })
   socket.on('grilled_options', (event) => {
-
-    console.log('grilled_options')
+    const menu = restaurant.getGrilledMenu();
+    menu.forEach(item => {
+      socket.emit('menu', {namE:  "chatBot", bodY: item, timE: `${moment().toLocaleString().split(' ')[4]}`,});
+    }) 
   })
   socket.on('peppersoup_options', (event) => {
-
-    console.log('peppersoup options')
+    const menu = restaurant.getSoupMenu();
+    menu.forEach(item => {
+      socket.emit('menu', {namE:  "chatBot", bodY: item, timE: `${moment().toLocaleString().split(' ')[4]}`,});
+    }) 
+  
   })
   socket.on('sides_options', (event) => {
-
-    console.log('sides options')
+    const menu = restaurant.getSideMenu();
+    menu.forEach(item => {
+      socket.emit('menu', {namE:  "chatBot", bodY: item, timE: `${moment().toLocaleString().split(' ')[4]}`,});
+    }) 
   })
   socket.on('beverage_options', (event) => {
-
-    console.log('beverage options')
+    const menu = restaurant.getBeverageMenu();
+    menu.forEach(item => {
+      socket.emit('menu', {namE:  "chatBot", bodY: item, timE: `${moment().toLocaleString().split(' ')[4]}`,});
+    }) 
   })
   
-socket.on("user_connected", (e) => {
-  socket.emit("user_connected_successful", `${e.info} connected successfully`);
-})
-    
+  socket.on("user_connected", (e) => {
+    socket.emit("user_connected_successful", `${e.info} connected successfully`);
+  })    
 })
 
-server.listen(3000, () => {
-  console.log("listening on *:3000");
+server.listen(4000, () => {
+  console.log("listening on *:4000");
 });
 
 

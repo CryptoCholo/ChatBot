@@ -8,7 +8,7 @@ function Home() {
    
   return (
     <div className="App">
-       <div className="h-screen w-screen flex flex-col items-center justify-around">
+       <div className=" h-screen w-screen flex flex-col items-center justify-around">
         <div className="text-6xl font-extrabold">
             CHOPLIFE RESTAURANT 
             
