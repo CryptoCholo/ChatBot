@@ -24,9 +24,7 @@ app.use(express.static(path.resolve(__dirname, '../dist')));
 
 
 
-const store =  mongooseStore.create({mongoUrl: process.env.MONGO_URL}).on('set', (e) => { 
-  console.log(e, "sessionId mutated");
-})
+const store =  mongooseStore.create({mongoUrl: process.env.MONGO_URL})
 
 
 const sesh = {
