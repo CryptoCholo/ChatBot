@@ -6,7 +6,8 @@
   "scripts": {
     "build": "cd ../ && vite build",
     "dev": "nodemon index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "install": "cd ../ && npm install && cd server && npm install"
   },
   "keywords": [],
   "author": "",
