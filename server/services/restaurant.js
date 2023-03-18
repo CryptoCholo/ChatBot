@@ -1,5 +1,6 @@
 const Menu = require('./menu');
 const Order = require('./order');
+const OrderModel = require('../models/order');
 
 
 
@@ -65,9 +66,10 @@ class Restaurant {
         return  `Order Checkout was succesful. Your Order Id : ${id}`;
     }
 
-    async getOrderHistory() {
-       const hist = await this.order.getOrderHistory;
-       return hist;
+    async getOrderHistory(sessionId) { 
+        const order = await OrderModel.find({customer: { sessionId }});
+        return order;
+
     }
 
     cancelOrder() {

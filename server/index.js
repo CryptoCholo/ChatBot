@@ -64,6 +64,7 @@ io.on("connection", (socket) => {
   const sessionId = socket.request.session.id;
 
   socket.on('input_error', (event) => {
+    console.log(event)
     socket.emit('menu', {namE:  "chatBot", bodY: " Oops! Your response is Invalid. Please respond with a valid input.", timE: `${moment().toLocaleString().split(' ')[4]}`,})
   })
  
@@ -93,9 +94,13 @@ io.on("connection", (socket) => {
   })
 
   socket.on('order_history', async (event) => {
-    const history = await restaurant.getOrderHistory();
-    console.log(history, 'history')
-    // socket.emit('menu', {namE:  "chatBot", bodY: history, timE: `${moment().toLocaleString().split(' ')[4]}`});
+    const history = await restaurant.getOrderHistory(sessionId);
+    history.forEach(order => {
+    console.log(order);
+      let  ordeR = `Order Id: ${order.id};  Total:  $${order.totalCost};  Items: ${order.items[0][0]} - $${order.items[0][1]}`
+       socket.emit('menu', {namE:  "chatBot", bodY: ordeR, timE: `${moment().toLocaleString().split(' ')[4]}`});
+    })
+   
     // console.log('order history')
   })
 
@@ -108,7 +113,7 @@ io.on("connection", (socket) => {
      })
      socket.emit('total', {namE:  "chatBot", bodY: `Total - $${order.total}`, timE: `${moment().toLocaleString().split(' ')[4]}`})
    } else {
-    socket.emit('current_order', {namE:  "chatBot", bodY: "You dont have any open orders", timE: `${moment().toLocaleString().split(' ')[4]}`});
+    socket.emit('current_order', {namE:  "chatBot", bodY: "You dont have any open orders. Reply 1 to create a new order.", timE: `${moment().toLocaleString().split(' ')[4]}`});
    }
   })
 

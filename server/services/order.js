@@ -15,7 +15,8 @@ class Order {
             customer: { sessionId: this.customer} ,
             items: this.items,
             totalCost: this.calculateTotal(),
-            status: this.status
+            status: this.status,
+            id: this.id
         };
         const order = new OrderModel(orderData);
         await order.save();
@@ -33,12 +34,6 @@ class Order {
         });
        
         return total;
-    }
-
-    async getOrderHistory() {
-        const order = await OrderModel.find();
-        console.log(order, 'order')
-
     }
 
     getOrderDetails() {

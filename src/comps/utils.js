@@ -47,11 +47,9 @@ export default function emitEvent(input) {
             event = "beverage_options";
             break;
           default:
-            return;
+            event = 'input_error';
         }
-      } else {
-        event = 'input-error';
-    }
+      } 
     return event
 }
 
