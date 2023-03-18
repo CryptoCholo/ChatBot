@@ -29,10 +29,7 @@ const store =  mongooseStore.create({mongoUrl: process.env.MONGO_URL}).on('set',
 })
 
 
-
-
-//configure session option
-const sessionMiddleware = session({
+const sesh = {
   name: "sessionId",
   secret: process.env.SESSION,
   resave: true,
@@ -43,7 +40,15 @@ const sessionMiddleware = session({
     maxAge: 604800000,//number of milliseconds in a week
     secure: false 
   },
-})
+}
+
+if (process.env.NODE_ENV === 'production') {
+  sesh.cookie.secure = true;
+  sesh.cookie.httpOnly = true;
+}
+
+//configure session option
+const sessionMiddleware = session(sesh)
 
 io.engine.use(sessionMiddleware);
 
@@ -162,6 +167,6 @@ io.on("connection", (socket) => {
   })    
 })
 
-server.listen(4000, () => {
+server.listen(process.env.PORT, () => {
   console.log("listening on *:4000");
 })
