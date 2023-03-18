@@ -1,5 +1,5 @@
 {
-  "name": "guess-game",
+  "name": "choplife-restaurant",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,7 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "start": "node ./server/index.js",
-    "install": "npm install && cd ./server && npm install"
+    "install": "npm install"
   },
   "dependencies": {
     "daisyui": "^2.51.3",
