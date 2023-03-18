@@ -96,12 +96,13 @@ io.on("connection", (socket) => {
   socket.on('order_history', async (event) => {
     const history = await restaurant.getOrderHistory(sessionId);
     history.forEach(order => {
-    console.log(order);
-      let  ordeR = `Order Id: ${order.id};  Total:  $${order.totalCost};  Items: ${order.items[0][0]} - $${order.items[0][1]}`
+      order.items.forEach(oi => {
+        let orderItem = `Item: ${oi[0]} - $${oi[1]}`;
+        socket.emit('menu', {namE:  "chatBot", bodY: orderItem, timE: `${moment().toLocaleString().split(' ')[4]}`});
+        })
+      let  ordeR = `Order Id: ${order.id};  Total:  $${order.totalCost};`
        socket.emit('menu', {namE:  "chatBot", bodY: ordeR, timE: `${moment().toLocaleString().split(' ')[4]}`});
     })
-   
-    // console.log('order history')
   })
 
   socket.on('current_order', (event) => {
