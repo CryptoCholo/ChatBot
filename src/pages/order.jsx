@@ -15,8 +15,6 @@ export default function Order() {
         let data;
         if (input === '') return;
         let  eventType = emitEvent(input);
-        console.log(eventType, "type");
-
 
             data = {
                 eventName: eventType,
@@ -26,7 +24,6 @@ export default function Order() {
                 statuS: "sent"
             }
             setAns((ans) => [...ans, data]);
-           
             socket.emit(eventType, data);
             setInput('');
         }
@@ -34,11 +31,32 @@ export default function Order() {
   
 
     useEffect(() => {
+
         socket.on('welcome', (data) => {
             setAns([...ans, data])
         });
+
         socket.on('menu', (data) => {
-            console.log(data.bodY, 'data') ;
+            setAns((ans) => [...ans, data])
+        });
+
+        socket.on('current_order', (data) => {
+            setAns((ans) => [...ans, data])
+        });
+
+        socket.on('total', (data) => {
+            setAns((ans) => [...ans, data])
+        });
+
+        socket.on('checkout', (data) => {
+            setAns((ans) => [...ans, data])
+        });
+
+        socket.on('order_cancelled', (data) => {
+            setAns((ans) => [...ans, data])
+        });
+
+        socket.on('history', (data) => {
             setAns((ans) => [...ans, data])
         });
         
@@ -46,6 +64,10 @@ export default function Order() {
         return () => {
           socket.off('welcome');
           socket.off('menu');
+          socket.off('current_order');
+          socket.off('total');
+          socket.off('order_cancelled');
+          socket.off('history');
         }
       }, []);
 
@@ -54,8 +76,8 @@ export default function Order() {
     };
 
     return (
-        <div className="flex w-full">
-            <main className="flex  w-full max-h-screen fixed p-5">
+        <div className="flex justify-between w-screen">
+            <main className="flex  w-3/4 max-h-screen p-5">
                 <div className="w-full flex flex-col justify-between">
                     <MsgBubble messages={ans} />
                     <form onSubmit={handleSubmit}>

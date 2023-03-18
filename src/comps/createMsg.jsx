@@ -17,7 +17,7 @@ export default function CreateMsg(props) {
         </div>
     )
 }
-
+// {backgroundColor: `hsl(158 64% 52% / 1)`, color: `hsl(158 100% 10%, 0 0% 100% / 1)`}
  {/* <div className="chat-image avatar">
                 <div className="w-10 rounded-full">
                     <img src={Img}/>

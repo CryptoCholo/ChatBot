@@ -8,7 +8,7 @@ const Restaurant = require('./services/restaurant');
 const moment = require('moment')
 
 const server = http.createServer(app);
-const {connect, db} = require('./db/db');
+const {connect} = require('./db/db');
 const mongooseStore = require('connect-mongo');
 
 //Initialize socket.io
@@ -24,8 +24,8 @@ app.use(express.static(path.resolve(__dirname, '../dist')));
 
 
 
-const store =  mongooseStore.create({mongoUrl: process.env.MONGO_URL}).on('create', (e) => { 
-  console.log(e, "sessionId created");
+const store =  mongooseStore.create({mongoUrl: process.env.MONGO_URL}).on('set', (e) => { 
+  console.log(e, "sessionId mutated");
 })
 
 
@@ -33,14 +33,14 @@ const store =  mongooseStore.create({mongoUrl: process.env.MONGO_URL}).on('creat
 
 //configure session option
 const sessionMiddleware = session({
+  name: "sessionId",
   secret: process.env.SESSION,
   resave: true,
   saveUninitialized: true,
   store: store,
   cookie: {
     name: "sessionId",
-    httpOnly: true,
-    maxAge: 3600000,
+    maxAge: 604800000,//number of milliseconds in a week
     secure: false 
   },
 })
@@ -57,58 +57,93 @@ app.get("/", (req, res) => {
   res.sendFile("/index.html", options);
 });
 
+const restaurant = new Restaurant();
 
 io.on("connection", (socket) => {
 
-  const restaurant = new Restaurant();
-
   const sessionId = socket.request.session.id;
-  console.log(sessionId, "sessionID");
 
-
+  socket.on('input_error', (event) => {
+    socket.emit('menu', {namE:  "chatBot", bodY: " Oops! Your response is Invalid. Please respond with a valid input.", timE: `${moment().toLocaleString().split(' ')[4]}`,})
+  })
+ 
   socket.on('showmenu', (event) => {
-
     socket.emit('welcome', {namE:  "chatBot", bodY: "Welcome to CHOPLIFE RESTAURANT. Please reply with any of the numbers in our options menu to continue.", timE: `${moment().toLocaleString().split(' ')[4]}`,})
   })
 
   socket.on('place_order', (event) => {
-    
+    restaurant.createOrder(sessionId)
     const menu = restaurant.getMenu();
     menu.forEach(item => {
       socket.emit('menu', {namE:  "chatBot", bodY: item, timE: `${moment().toLocaleString().split(' ')[4]}`,});
     }) 
   })
-  socket.on('order_history', (event) => {
-   
-    console.log('order history')
-  })
-  socket.on('current_order', (event) => {
-   
-    console.log('current order')
-  })
-  socket.on('cancel_order', (event) => {
 
-    console.log('cancelled order')
+  socket.on('option_selected', async (event) => {
+    const msg = await  restaurant.addOrderItem(event.bodY);
+     socket.emit('menu', {namE:  "chatBot", bodY: msg, timE: `${moment().toLocaleString().split(' ')[4]}`,});
   })
+
+
+  socket.on('cont_inue', (event) => {
+    const menu = restaurant.getMenu();
+    menu.forEach(item => {
+      socket.emit('menu', {namE:  "chatBot", bodY: item, timE: `${moment().toLocaleString().split(' ')[4]}`,});
+    }) 
+  })
+
+  socket.on('order_history', async (event) => {
+    const history = await restaurant.getOrderHistory();
+    console.log(history, 'history')
+    // socket.emit('menu', {namE:  "chatBot", bodY: history, timE: `${moment().toLocaleString().split(' ')[4]}`});
+    // console.log('order history')
+  })
+
+  socket.on('current_order', (event) => {
+   const order = restaurant.getCurrentOrder();
+   if (order) {
+    order.items.forEach(item => {
+      const it = `${item[0]} - $${item[1]}`
+      socket.emit('current_order', {namE:  "chatBot", bodY: it, timE: `${moment().toLocaleString().split(' ')[4]}`});
+     })
+     socket.emit('total', {namE:  "chatBot", bodY: `Total - $${order.total}`, timE: `${moment().toLocaleString().split(' ')[4]}`})
+   } else {
+    socket.emit('current_order', {namE:  "chatBot", bodY: "You dont have any open orders", timE: `${moment().toLocaleString().split(' ')[4]}`});
+   }
+  })
+
+
+  socket.on('checkout_order', async (event) => {
+    const message = await restaurant.checkoutOrder();
+    socket.emit('checkout', {namE:  "chatBot", bodY: message, timE: `${moment().toLocaleString().split(' ')[4]}`})
+  })
+
+  socket.on('cancel_order', (event) => {
+    const msg = restaurant.cancelOrder();
+    socket.emit('order_cancelled', {namE:  "chatBot", bodY: msg, timE: `${moment().toLocaleString().split(' ')[4]}`})
+  })
+
   socket.on('grilled_options', (event) => {
     const menu = restaurant.getGrilledMenu();
     menu.forEach(item => {
       socket.emit('menu', {namE:  "chatBot", bodY: item, timE: `${moment().toLocaleString().split(' ')[4]}`,});
     }) 
   })
+
   socket.on('peppersoup_options', (event) => {
     const menu = restaurant.getSoupMenu();
     menu.forEach(item => {
       socket.emit('menu', {namE:  "chatBot", bodY: item, timE: `${moment().toLocaleString().split(' ')[4]}`,});
     }) 
-  
   })
+
   socket.on('sides_options', (event) => {
     const menu = restaurant.getSideMenu();
     menu.forEach(item => {
       socket.emit('menu', {namE:  "chatBot", bodY: item, timE: `${moment().toLocaleString().split(' ')[4]}`,});
     }) 
   })
+
   socket.on('beverage_options', (event) => {
     const menu = restaurant.getBeverageMenu();
     menu.forEach(item => {
@@ -123,16 +158,4 @@ io.on("connection", (socket) => {
 
 server.listen(4000, () => {
   console.log("listening on *:4000");
-});
-
-
-//   if (req.session.views) {
-//     req.session.views++;
-//     res.setHeader('Content-Type', 'text/html');
-//     res.write('<p>Views: ' + req.session.views + '</p>');
-//     res.write('<p>Expires in: ' + (req.session.cookie.maxAge / 1000) + 's</p>');
-//     res.end();
-// } else {
-//     req.session.views = 1;
-//     res.end('Welcome to the session demo. Refresh page!');
-// }
+})

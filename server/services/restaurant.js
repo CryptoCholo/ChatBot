@@ -1,40 +1,17 @@
-const Menu = require('./menu')
+const Menu = require('./menu');
 const Order = require('./order');
 
-
-
-class RestaurantEvent {
-    constructor({ data, eventName, message } ) {
-        this.data = data;
-        this.eventName = eventName;
-        this.message = message;
-    }
-}
 
 
 
 class Restaurant {
     constructor() {
         this.menu = new Menu();
-        this.order = new Order();
+        this.order = false;
         this.orderHistory = [];
     }
 
-    createEvent({ message, data, eventName }) {
-        const event = new RestaurantEvent({ message, data, eventName })
-        this.events.push(event);
-        return event;
-    }
-
-    emitEvent(event) {
-        this.socket.emit(event.eventName, event);
-    }
-
-    emitRestaurantEvent({ message, data, eventName }) {
-        const event = this.createEvent({ message, data, eventName });
-        this.emitEvent(event)
-    }
-
+  
 
     getMenu() {
         return this.menu.getMenu();
@@ -55,24 +32,47 @@ class Restaurant {
         return this.menu.getBeverageMenu();
     }
 
-    placeOrder(orderItems) {
-        const items = [];
-        orderItems.forEach(item => {
-            const menuItem = this.menu.menuItems.find(menuItem => menuItem.name === item.name);
-            if (menuItem) {
-                items.push(menuItem);
-            }
-        });
-        this.order.addItems(items);
-        return this.order.calculateTotal();
+    createOrder(sessionId) {
+         this.order = new Order(sessionId);
+         return this.order.id;
+    }
+
+    async addOrderItem(input) {
+        if (this.order) {
+            let item = this.menu.index[input]
+            this.order.addItem(item)
+            return  'Option has been added to your order. Reply 2 to continue or 99 to checkout'
+        }
+       return "Reply 1 to create a new order";
     }
 
     getCurrentOrder() {
+        if (!this.order) {
+            return false;
+        }
         return this.order.getOrderDetails();
     }
 
-    getOrderHistory() {
-        return this.order.getOrderHistory();
+    async  checkoutOrder() {
+        if (!this.order) {
+            return "No Order to checkout. Reply 1 to create a new order";
+        }
+       this.order.status = true;
+       this.orderHistory.push(this.order);
+        await this.order.save();
+        let id = this.order.id;
+        this.order = false;
+        return  `Order Checkout was succesful. Your Order Id : ${id}`;
+    }
+
+    async getOrderHistory() {
+       const hist = await this.order.getOrderHistory;
+       return hist;
+    }
+
+    cancelOrder() {
+         this.order = false;
+         return "Your Order has been cancelled"
     }
 }
 

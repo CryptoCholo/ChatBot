@@ -7,14 +7,15 @@ const orderSchema = new mongoose.Schema({
             required: true
         }
     },
-    items: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'MenuItem'
-    }],
+    items: {
+        type: [[String]], 
+        required: true
+    },
     totalCost: {
         type: Number,
         required: true
     },
+    status: {type: Boolean, default: false}
 }, {timestamp: true});
 
 const OrderModel = mongoose.model('Order', orderSchema);

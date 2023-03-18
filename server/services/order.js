@@ -2,35 +2,48 @@ const OrderModel = require('../models/order')
 
 
 class Order {
-    constructor(items, customer) {
+    constructor(customer) {
         this.customer = customer;
-        this.items = items;
-        this.timestamp = new Date();
+        this.items = [];
+        this.total =  this.calculateTotal(),
+        this.status = false;
+        this.id =  Math.floor(Math.random() * 10000);
     }
 
     async save() {
         const orderData = {
-            items: this.items.map(item => ({ name: item.name, price: item.price })),
-            total: this.calculateTotal(),
-            timestamp: this.timestamp
+            customer: { sessionId: this.customer} ,
+            items: this.items,
+            totalCost: this.calculateTotal(),
+            status: this.status
         };
         const order = new OrderModel(orderData);
         await order.save();
     }
 
+    addItem(Item) {
+        this.items.push(Item);
+    }
+
     calculateTotal() {
         let total = 0;
         this.items.forEach(item => {
-            total += item.price;
+           
+            total += Number(item[1]);
         });
+       
         return total;
     }
 
+    async getOrderHistory() {
+        const order = await OrderModel.find();
+        console.log(order, 'order')
+
+    }
+
     getOrderDetails() {
-        const orderItems = this.items.map(item => {
-            return { name: item.name, price: item.price };
-        });
-        return { items: orderItems, total: this.calculateTotal(), timestamp: this.timestamp };
+        const orderItems = this.items;
+        return { items: orderItems, total: this.calculateTotal()};
     }
 }
 
